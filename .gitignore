@@ -1,7 +1,8 @@
-﻿# Environment & Secrets
+# Environment & Secrets
 .env
 .env.local
 *.env
+profile.md
 
 # Python Cache
 __pycache__/
