@@ -16,7 +16,7 @@ import re
 import zipfile
 import xml.etree.ElementTree as ET
 from pathlib import Path
-from typing import Dict, List, Set, Tuple
+from typing import Dict, List, Set, Tuple, Union
 from oppscout.models import UserProfile
 
 logger = logging.getLogger("oppscout.parser")
@@ -204,10 +204,11 @@ def extract_text_from_file(file_path: Path) -> str:
             return ""
 
 
-def load_content_from_target(target_path: Path) -> Tuple[str, List[str]]:
+def load_content_from_target(target_path: Union[str, Path]) -> Tuple[str, List[str]]:
     """Recursively scans a directory OR processes a single file across all supported formats.
     Extracts text, discovers links, and builds an exhaustive ground-truth knowledge bundle.
     """
+    target_path = Path(target_path)
     if not target_path.exists():
         raise FileNotFoundError(f"Target path does not exist: {target_path}")
 
@@ -411,10 +412,11 @@ def extract_sections_heuristic(text: str) -> UserProfile:
     )
 
 
-def parse_target_path(target_path: Path) -> Tuple[UserProfile, List[str]]:
+def parse_target_path(target_path: Union[str, Path]) -> Tuple[UserProfile, List[str]]:
     """Ingests any file (.md, .txt, .pdf, .pptx, .xlsx, .csv, .docx, code) OR entire folder,
     and constructs the parsed UserProfile.
     """
+    target_path = Path(target_path)
     combined_text, files_ingested = load_content_from_target(target_path)
     profile = extract_sections_heuristic(combined_text)
     return profile, files_ingested
