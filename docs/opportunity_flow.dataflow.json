@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "diagram_type": "dataflow",
+  "meta": {
+    "title": "Opportunity Scout Autonomous Pipeline",
+    "output": "docs/architecture.html",
+    "viewBox": [1080, 520],
+    "animation": "trace",
+    "quality_profile": "showcase",
+    "views": [
+      { "id": "ingest-view", "label": "Profile Ingestion", "focus": ["profile_md", "parser", "signals"], "note": "Drag and drop profile markdown parsed into high-dimensional founder leverage." },
+      { "id": "scraper-view", "label": "Deep Market Scraping", "focus": ["parser", "reddit_scraper", "hn_crawler", "ddg_search", "signals"], "note": "Live mining across Reddit, HackerNews and DuckDuckGo." },
+      { "id": "synthesis-view", "label": "5-Factor Scoring", "focus": ["signals", "openrouter", "scoring_matrix", "terminal_report", "html_report"], "note": "Scoring pain, willingness-to-pay, and delivering direct validation directives." }
+    ]
+  },
+  "stages": [
+    { "label": "1. Ingest" },
+    { "label": "2. Extract" },
+    { "label": "3. Mine Signals" },
+    { "label": "4. Synthesize" },
+    { "label": "5. Deliver" }
+  ],
+  "nodes": [
+    { "id": "profile_md", "type": "frontend", "label": "Profile.md", "sublabel": "drag & drop", "stage": 0, "row": 1, "tag": "markdown" },
+    { "id": "parser", "type": "backend", "label": "Profile Parser", "sublabel": "uncovers leverage", "stage": 1, "row": 1, "tag": "skills & network" },
+    { "id": "reddit_scraper", "type": "external", "label": "Reddit Scraper", "sublabel": "r/smallbusiness", "stage": 2, "row": 0, "tag": "complaints" },
+    { "id": "hn_crawler", "type": "external", "label": "HackerNews", "sublabel": "Algolia API", "stage": 2, "row": 1, "tag": "workflows" },
+    { "id": "ddg_search", "type": "external", "label": "DuckDuckGo", "sublabel": "deep body parser", "stage": 2, "row": 2, "tag": "pain signals" },
+    { "id": "signals", "type": "messagebus", "label": "Signals Stream", "sublabel": "deduplicated pain", "stage": 3, "row": 0, "tag": "cash leaks" },
+    { "id": "scoring_matrix", "type": "backend", "label": "5-Factor Matrix", "sublabel": "pain & WTP score", "stage": 3, "row": 1, "tag": "scoring" },
+    { "id": "openrouter", "type": "cloud", "label": "OpenRouter AI", "sublabel": "low-cost inference", "stage": 3, "row": 2, "tag": "synthesis" },
+    { "id": "terminal_report", "type": "frontend", "label": "Rich Terminal", "sublabel": "instant briefing", "stage": 4, "row": 0, "tag": "CLI" },
+    { "id": "html_report", "type": "frontend", "label": "Classical HTML", "sublabel": "executive dossier", "stage": 4, "row": 1, "tag": "action blueprint" },
+    { "id": "mcp_server", "type": "cloud", "label": "MCP Server", "sublabel": "AI agent tool", "stage": 4, "row": 2, "tag": "FastMCP" }
+  ],
+  "flows": [
+    { "id": "flow-drag", "from": "profile_md", "to": "parser", "label": "raw markdown", "classification": "user input", "variant": "emphasis", "route": "straight" },
+    { "id": "flow-reddit", "from": "parser", "to": "reddit_scraper", "label": "query domain", "classification": "crawler", "variant": "default", "fromSide": "right", "toSide": "left", "via": [[420, 271], [420, 157]], "labelAt": [420, 200] },
+    { "id": "flow-hn", "from": "parser", "to": "hn_crawler", "label": "pain vectors", "classification": "crawler", "variant": "default", "route": "straight" },
+    { "id": "flow-ddg", "from": "parser", "to": "ddg_search", "label": "unsexy search", "classification": "crawler", "variant": "default", "fromSide": "right", "toSide": "left", "via": [[420, 271], [420, 385]], "labelAt": [420, 340] },
+    { "id": "flow-sig1", "from": "reddit_scraper", "to": "signals", "label": "community vents", "classification": "evidence", "variant": "emphasis", "fromSide": "right", "toSide": "left", "route": "straight" },
+    { "id": "flow-sig2", "from": "hn_crawler", "to": "scoring_matrix", "label": "friction points", "classification": "evidence", "variant": "emphasis", "fromSide": "right", "toSide": "left", "route": "straight" },
+    { "id": "flow-sig3", "from": "ddg_search", "to": "openrouter", "label": "real quotes", "classification": "evidence", "variant": "emphasis", "fromSide": "right", "toSide": "left", "route": "straight" },
+    { "id": "flow-score", "from": "signals", "to": "scoring_matrix", "label": "filtered pain", "classification": "pipeline", "variant": "emphasis", "fromSide": "bottom", "toSide": "top", "route": "straight", "labelAt": [745, 200] },
+    { "id": "flow-ai", "from": "openrouter", "to": "scoring_matrix", "label": "reasoning tokens", "classification": "inference", "variant": "default", "fromSide": "top", "toSide": "bottom", "route": "straight", "labelAt": [745, 428] },
+    { "id": "flow-term", "from": "scoring_matrix", "to": "terminal_report", "label": "rich summary", "classification": "output", "variant": "emphasis", "fromSide": "right", "toSide": "left", "via": [[850, 271], [850, 157]], "labelAt": [850, 200] },
+    { "id": "flow-html", "from": "scoring_matrix", "to": "html_report", "label": "dossier + 48h plan", "classification": "output", "variant": "emphasis", "route": "straight" },
+    { "id": "flow-mcp", "from": "scoring_matrix", "to": "mcp_server", "label": "tool response", "classification": "output", "variant": "default", "fromSide": "right", "toSide": "left", "via": [[850, 271], [850, 385]], "labelAt": [850, 340] }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Autonomous Problem Mining",
+      "items": [
+        "Single markdown drag & drop input automatically extracts founder unfair advantage",
+        "Deep scrapes Reddit (r/smallbusiness), HackerNews, and DuckDuckGo for authentic complaints",
+        "Scores opportunities across Pain, Willingness-to-Pay, Whitespace, and Founder-Fit"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "Action Execution Directives",
+      "items": [
+        "Zero guesswork: tells the user exactly which person/market to visit",
+        "Provides verbatim 'The Mom Test' opening interview questions",
+        "Delivers 48-Hour Day-1 validation blueprint before writing code"
+      ]
+    }
+  ]
+}

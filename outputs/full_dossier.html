@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Opportunity Scout | Executive Strategic Dossier</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=EB+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0e0e11;
+            --bg-secondary: #141419;
+            --bg-card: #181820;
+            --accent-gold: #c5a059;
+            --accent-gold-light: #e6c88b;
+            --text-primary: #ece8df;
+            --text-muted: #9e9a91;
+            --border-classical: #2f2d38;
+            --border-gold: #8e733e;
+            --font-serif: 'EB Garamond', Georgia, serif;
+            --font-display: 'Cinzel', serif;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: var(--font-serif);
+            font-size: 19px;
+            line-height: 1.65;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 960px;
+            margin: 0 auto;
+        }
+
+        .classical-frame {
+            border: 1px solid var(--border-gold);
+            padding: 6px;
+            margin-bottom: 40px;
+        }
+
+        .classical-inner-frame {
+            border: 1px solid var(--border-classical);
+            background: var(--bg-secondary);
+            padding: 40px;
+            text-align: center;
+        }
+
+        .brand-eyebrow {
+            font-family: var(--font-mono);
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            font-size: 13px;
+            color: var(--accent-gold);
+            margin-bottom: 12px;
+        }
+
+        h1.main-title {
+            font-family: var(--font-display);
+            font-size: 38px;
+            letter-spacing: 1.5px;
+            color: #ffffff;
+            margin-bottom: 14px;
+            font-weight: 800;
+        }
+
+        .executive-summary-text {
+            font-size: 21px;
+            font-style: italic;
+            color: var(--text-muted);
+            max-width: 780px;
+            margin: 0 auto;
+        }
+
+        .profile-strip {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-classical);
+            padding: 24px;
+            margin-bottom: 40px;
+        }
+
+        .profile-cell strong {
+            display: block;
+            font-family: var(--font-display);
+            font-size: 14px;
+            letter-spacing: 1px;
+            color: var(--accent-gold);
+            margin-bottom: 4px;
+        }
+
+        .profile-cell span {
+            font-size: 16px;
+            color: var(--text-primary);
+        }
+
+        .section-heading {
+            font-family: var(--font-display);
+            font-size: 24px;
+            color: var(--accent-gold);
+            border-bottom: 1px solid var(--border-classical);
+            padding-bottom: 8px;
+            margin: 40px 0 24px 0;
+            letter-spacing: 1px;
+        }
+
+        .signals-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 40px;
+        }
+
+        @media (max-width: 768px) {
+            .signals-container { grid-template-columns: 1fr; }
+        }
+
+        .signal-item {
+            background: var(--bg-card);
+            border-left: 3px solid var(--accent-gold);
+            padding: 16px;
+            border-top: 1px solid var(--border-classical);
+            border-right: 1px solid var(--border-classical);
+            border-bottom: 1px solid var(--border-classical);
+        }
+
+        .signal-source {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            text-transform: uppercase;
+            color: var(--accent-gold);
+            margin-bottom: 6px;
+        }
+
+        .signal-title {
+            font-weight: 700;
+            font-size: 17px;
+            color: #ffffff;
+            margin-bottom: 6px;
+        }
+
+        .signal-snippet {
+            font-size: 15px;
+            font-style: italic;
+            color: var(--text-muted);
+        }
+
+        .dossier-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-classical);
+            margin-bottom: 40px;
+            padding: 32px;
+            position: relative;
+        }
+
+        .dossier-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .dossier-tag {
+            font-family: var(--font-display);
+            color: var(--accent-gold);
+            font-size: 14px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .score-badge {
+            background: rgba(197, 160, 89, 0.15);
+            border: 1px solid var(--accent-gold);
+            color: var(--accent-gold-light);
+            font-family: var(--font-mono);
+            padding: 4px 12px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .dossier-title {
+            font-family: var(--font-display);
+            font-size: 26px;
+            color: #ffffff;
+            margin-bottom: 20px;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            background: var(--bg-card);
+            padding: 16px;
+            border: 1px solid var(--border-classical);
+            margin-bottom: 24px;
+            text-align: center;
+        }
+
+        .metric-label {
+            font-size: 12px;
+            font-family: var(--font-display);
+            color: var(--text-muted);
+            letter-spacing: 0.5px;
+        }
+
+        .metric-value {
+            font-family: var(--font-mono);
+            font-size: 20px;
+            font-weight: bold;
+            color: var(--accent-gold-light);
+            margin-top: 4px;
+        }
+
+        .dossier-section {
+            margin-bottom: 20px;
+        }
+
+        .dossier-section h3 {
+            font-family: var(--font-display);
+            font-size: 16px;
+            color: var(--accent-gold);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+
+        .highlight-p {
+            font-size: 20px;
+            color: #ffffff;
+        }
+
+        .unfair-edge-box {
+            background: rgba(197, 160, 89, 0.08);
+            border-left: 3px solid var(--accent-gold);
+            padding: 16px;
+        }
+
+        .tech-blueprint-box {
+            background: #111117;
+            border: 1px solid #3c324a;
+            border-left: 3px solid #b388ff;
+            padding: 20px;
+            margin-top: 16px;
+        }
+
+        .tech-blueprint-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .badge-high-ticket {
+            background: rgba(179, 136, 255, 0.2);
+            border: 1px solid #b388ff;
+            color: #d1b3ff;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            padding: 3px 10px;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        .badge-mrr {
+            background: rgba(80, 250, 123, 0.15);
+            border: 1px solid #50fa7b;
+            color: #50fa7b;
+            font-family: var(--font-mono);
+            font-size: 13px;
+            padding: 3px 10px;
+            font-weight: bold;
+        }
+
+        .blueprint-code {
+            font-family: var(--font-mono);
+            font-size: 14px;
+            background: #09090d;
+            border: 1px solid #23222a;
+            padding: 16px;
+            color: #b0aec2;
+            white-space: pre-wrap;
+            line-height: 1.5;
+            margin-top: 8px;
+        }
+
+        .action-list {
+            padding-left: 24px;
+            color: var(--text-primary);
+        }
+
+        .action-list li {
+            margin-bottom: 6px;
+        }
+
+        .execution-footer {
+            border-top: 1px solid var(--border-classical);
+            padding-top: 20px;
+            margin-top: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .tech-container {
+            margin-top: 6px;
+        }
+
+        .tech-badge {
+            display: inline-block;
+            background: #252430;
+            color: #d1cdd9;
+            font-family: var(--font-mono);
+            font-size: 13px;
+            padding: 3px 8px;
+            margin-right: 6px;
+            border-radius: 3px;
+        }
+
+        .monetization-block span {
+            display: block;
+            color: var(--accent-gold-light);
+            font-style: italic;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 60px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border-classical);
+            font-size: 14px;
+            color: var(--text-muted);
+            font-family: var(--font-display);
+            letter-spacing: 1px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="classical-frame">
+            <div class="classical-inner-frame">
+                <div class="brand-eyebrow">Opportunity Scout Strategic Dossier</div>
+                <h1 class="main-title">Validated Market Pain & Niche Blueprint</h1>
+                <p class="executive-summary-text">"Opportunity Scout identified 3 hyper-targeted, high-conviction real-world problems (Target Language: English). These leverage your technical capability in Iot along with your geographical and network unfair advantage in Jaipur. Rather than building crowded consumer toys, each opportunity solves high-friction B2B operational cash leakage with immediate willingness to pay."</p>
+            </div>
+        </div>
+
+        <div class="profile-strip">
+            <div class="profile-cell">
+                <strong>Founder Skills</strong>
+                <span>Iot, Python, FastAPI, PostgreSQL, Next.js, Basic IoT & Hardware Prototyping (ESP32, GSM modems), Data extraction & Workflow automation</span>
+            </div>
+            <div class="profile-cell">
+                <strong>Local Foothold</strong>
+                <span>Jaipur</span>
+            </div>
+            <div class="profile-cell">
+                <strong>Domain Context</strong>
+                <span>Trucking & Regional Freight Logistics, Stone & Marble Cutting / Processing (Kishangarh & Makrana belt), B2B SME Wholesale Distribution</span>
+            </div>
+            <div class="profile-cell">
+                <strong>Unfair Advantage</strong>
+                <span>My uncle owns a regional fleet of 45 freight trucks running between Rajasthan, Gujarat, and Delhi NCR.</span>
+            </div>
+        </div>
+
+        <h2 class="section-heading">Verified Field Signals Mined</h2>
+        <div class="signals-container">
+            
+        <div class="signal-item">
+            <div class="signal-source">Tier-2/3 Industrial Cluster Field Study &bull; Quality Dispute & Cashflow Block</div>
+            <div class="signal-title">Batch-to-Batch Color & Dimension Variation Leading to 12% Customer Rejections</div>
+            <div class="signal-snippet">"In marble cutting, stone polishing, and textile dye plants, master technicians blend batches by visual estimation. Finished shipments arrive at client construction sites with noticeable shade mismatches, leading to held back payments of ₹3L-₹10L."</div>
+        </div>
+        
+        <div class="signal-item">
+            <div class="signal-source">Perishable Cold-Chain Logistics Audit &bull; Cold Chain Shrinkage</div>
+            <div class="signal-title">Highway Refrigeration Shutdown Causing Terminal Mandi Spoilage</div>
+            <div class="signal-snippet">"Drivers turn off active cooling compressors during dhaba rest stops to steal or save diesel. Consignments arrive rotten at terminal wholesale mandis, forcing distress liquidation at 50% discount."</div>
+        </div>
+        
+        <div class="signal-item">
+            <div class="signal-source">B2B Wholesale Trade Association Report &bull; Receivables Leakage</div>
+            <div class="signal-title">Disputed Delivery Challans (Khata) & Uncollectible Receivables</div>
+            <div class="signal-snippet">"Distributors deliver ₹20L goods monthly on credit. 40 days later, buyers claim cartons arrived short or damaged. Because proof of delivery was a signed paper carbon copy lost in a van, distributors absorb 3-5% margin write-offs."</div>
+        </div>
+        
+        <div class="signal-item">
+            <div class="signal-source">Regional Transport Nagar Ground Audit &bull; Cash Leakage & Fraud</div>
+            <div class="signal-title">Manual Toll & Diesel Slip Reconciliations Hiding 15-20% Cash Siphoning</div>
+            <div class="signal-snippet">"In regional fleet corridors, drivers hand in physical paper slips 10-15 days after trips. Fleet owners waste 4 hours every Saturday manually entering numbers into Excel, missing duplicate or inflated diesel pump receipts."</div>
+        </div>
+        
+        </div>
+
+        <h2 class="section-heading">Bespoke High-Conviction Opportunities</h2>
+        <div class="dossiers-wrapper">
+            
+        <article class="dossier-card">
+            <header class="dossier-header">
+                <div class="dossier-meta">
+                    <span class="dossier-tag">Opportunity #1 (English)</span>
+                    <span class="score-badge">Score: 95.5/100</span>
+                </div>
+                <h2 class="dossier-title">Jaipur 24-Hour E-Waybill & Compliance Detention Guardian</h2>
+            </header>
+
+            <div class="metrics-grid">
+                <div class="metric-cell">
+                    <div class="metric-label">Pain Intensity</div>
+                    <div class="metric-value">10/10</div>
+                </div>
+                <div class="metric-cell">
+                    <div class="metric-label">Willingness To Pay</div>
+                    <div class="metric-value">9/10</div>
+                </div>
+                <div class="metric-cell">
+                    <div class="metric-label">Founder-Problem Fit</div>
+                    <div class="metric-value">10/10</div>
+                </div>
+                <div class="metric-cell">
+                    <div class="metric-label">Competition Whitespace</div>
+                    <div class="metric-value">9/10</div>
+                </div>
+                <div class="metric-cell">
+                    <div class="metric-label">Day-1 Feasibility</div>
+                    <div class="metric-value">9/10</div>
+                </div>
+            </div>
+
+            <section class="dossier-section">
+                <h3>The Real-World Bleeding Neck Problem</h3>
+                <p class="highlight-p">When transit vehicles face traffic jams or minor mechanical snags around Jaipur, the 24-hour E-Waybill validity expires. State tax inspectors seize the vehicles, demanding 200% penalty on the tax amount (often ₹1,00,000+).</p>
+            </section>
+
+            <section class="dossier-section">
+                <h3>Target Customer & Who Pays</h3>
+                <p>Transport Dispatchers and Fleet Operators managing inter-state shipments across Jaipur</p>
+            </section>
+
+            <section class="dossier-section">
+                <h3>Current Broken / Clumsy Workarounds</h3>
+                <p>Dispatchers rely on memory or WhatsApp chat messages, missing expiration deadlines while drivers sleep at dhabas.</p>
+            </section>
+
+            <section class="dossier-section unfair-edge-box">
+                <h3>Founder's Unfair Advantage (Founder-Problem Fit)</h3>
+                <p>Your local foothold in Jaipur and connection 'My uncle owns a regional fleet of 45 freight trucks running between Rajasthan, Gujarat, and Delhi NCR.' give you immediate boots-on-the-ground access to live transport operations.</p>
+            </section>
+
+            <section class="dossier-section">
+                <h3>48-Hour Day-1 to Day-3 Validation Blueprint (No Heavy Code)</h3>
+                <ol class="action-list">
+                    <li>DIRECT ACTION: Visit 3 transport dispatch offices in Jaipur during evening departures.</li><li>THE MOM TEST: 'When was the last time an inter-state vehicle was detained for an expired E-Waybill?'</li><li>DAY 1 (48h Validation): Set up an automated WhatsApp bot that parses E-Waybill PDFs and schedules expiry alerts 3 hours in advance.</li><li>DAY 2 CONCIERGE PROOF: Hook 15 live trucks to the alert system.</li><li>DAY 3 CLOSE: Sign annual compliance retention at ₹2,999/month per dispatch branch.</li>
+                </ol>
+            </section>
+
+            
+            <section class="dossier-section tech-blueprint-box">
+                <div class="tech-blueprint-header">
+                    <span class="badge-high-ticket">High-Ticket B2B Tech &bull; Anti-Freelancing</span>
+                    <span class="badge-mrr">₹1,50,000 - ₹3,00,000 / month with 30-40 fleet accounts</span>
+                </div>
+                <h3>High-Ticket Tech Architecture & Anti-Freelancing Blueprint</h3>
+                <pre class="blueprint-code">Architecture: Edge-to-Cloud Telemetry & Automation Hub
+Scaling: NEVER bill hourly. Always sell an unkillable business outcome.</pre>
+            </section>
+            
+
+            <div class="execution-footer">
+                <div>
+                    <strong>Lean Tech Stack:</strong>
+                    <div class="tech-container"><span class='tech-badge'>Iot</span><span class='tech-badge'>Python</span><span class='tech-badge'>FastAPI</span><span class='tech-badge'>PostgreSQL</span><span class='tech-badge'>Next.js</span><span class='tech-badge'>Basic IoT & Hardware Prototyping (ESP32</span></div>
+                </div>
+                <div class="monetization-block">
+                    <strong>Pricing & Monetization Model:</strong>
+                    <span>₹2,999/month per dispatch branch or ₹199 per inter-state consignment alert.</span>
+                </div>
+            </div>
+        </article>
+        
+        <article class="dossier-card">
+            <header class="dossier-header">
+                <div class="dossier-meta">
+                    <span class="dossier-tag">Opportunity #2 (English)</span>
+                    <span class="score-badge">Score: 92.5/100</span>
+                </div>
+                <h2 class="dossier-title">Trucking & Regional Freight Logistics Digital Batch Variation & Proof-of-Handover Certifier</h2>
+            </header>
+
+            <div class="metrics-grid">
+                <div class="metric-cell">
+                    <div class="metric-label">Pain Intensity</div>
+                    <div class="metric-value">9/10</div>
+                </div>
+                <div class="metric-cell">
+                    <div class="metric-label">Willingness To Pay</div>
+                    <div class="metric-value">9/10</div>
+                </div>
+                <div class="metric-cell">
+                    <div class="metric-label">Founder-Problem Fit</div>
+                    <div class="metric-value">10/10</div>
+                </div>
+                <div class="metric-cell">
+                    <div class="metric-label">Competition Whitespace</div>
+                    <div class="metric-value">9/10</div>
+                </div>
+                <div class="metric-cell">
+                    <div class="metric-label">Day-1 Feasibility</div>
+                    <div class="metric-value">9/10</div>
+                </div>
+            </div>
+
+            <section class="dossier-section">
+                <h3>The Real-World Bleeding Neck Problem</h3>
+                <p class="highlight-p">In regional manufacturing, stone processing, and wholesale trade around Jaipur, batch variation and disputed transit damage cause buyers to withhold 10-20% final payment, paralyzing working capital.</p>
+            </section>
+
+            <section class="dossier-section">
+                <h3>Target Customer & Who Pays</h3>
+                <p>Plant Managers, Marble/Textile Processors, and B2B Fabricators in Jaipur</p>
+            </section>
+
+            <section class="dossier-section">
+                <h3>Current Broken / Clumsy Workarounds</h3>
+                <p>Supervisors eyeball finished lots and rely on signed paper slips. When claims arrive 30 days later, there is zero photographic proof.</p>
+            </section>
+
+            <section class="dossier-section unfair-edge-box">
+                <h3>Founder's Unfair Advantage (Founder-Problem Fit)</h3>
+                <p>Your technical skills [Iot, Python, FastAPI, PostgreSQL, Next.js, Basic IoT & Hardware Prototyping (ESP32, GSM modems), Data extraction & Workflow automation] allow you to deploy a tamper-proof photo verification workflow operable in 5 seconds.</p>
+            </section>
+
+            <section class="dossier-section">
+                <h3>48-Hour Day-1 to Day-3 Validation Blueprint (No Heavy Code)</h3>
+                <ol class="action-list">
+                    <li>DIRECT ACTION: Reach out to your contact at the local manufacturing unit ('My uncle owns a regional fleet of 45 freight trucks running between Rajasthan, Gujarat, and Delhi NCR.').</li><li>THE MOM TEST: 'How much money is stuck in client deductions due to claims of finish or transit damage?'</li><li>DAY 1 (48h Validation): Build a mobile web form generating watermarked inspection certificates with GPS & timestamp.</li><li>DAY 2 CONCIERGE PROOF: Attach the digital proof link to 5 outgoing shipments.</li><li>DAY 3 CLOSE: Deploy the verification suite for ₹8,999/month per facility.</li>
+                </ol>
+            </section>
+
+            
+            <section class="dossier-section tech-blueprint-box">
+                <div class="tech-blueprint-header">
+                    <span class="badge-high-ticket">High-Ticket B2B Tech &bull; Anti-Freelancing</span>
+                    <span class="badge-mrr">₹1,80,000 - ₹4,00,000 / month with 15-20 factory clients</span>
+                </div>
+                <h3>High-Ticket Tech Architecture & Anti-Freelancing Blueprint</h3>
+                <pre class="blueprint-code">Architecture: Edge-to-Cloud Telemetry & Automation Hub
+Scaling: NEVER bill hourly. Always sell an unkillable business outcome.</pre>
+            </section>
+            
+
+            <div class="execution-footer">
+                <div>
+                    <strong>Lean Tech Stack:</strong>
+                    <div class="tech-container"><span class='tech-badge'>Iot</span><span class='tech-badge'>Python</span><span class='tech-badge'>FastAPI</span><span class='tech-badge'>PostgreSQL</span><span class='tech-badge'>Next.js</span><span class='tech-badge'>Basic IoT & Hardware Prototyping (ESP32</span></div>
+                </div>
+                <div class="monetization-block">
+                    <strong>Pricing & Monetization Model:</strong>
+                    <span>₹8,999/month per manufacturing facility.</span>
+                </div>
+            </div>
+        </article>
+        
+        <article class="dossier-card">
+            <header class="dossier-header">
+                <div class="dossier-meta">
+                    <span class="dossier-tag">Opportunity #3 (English)</span>
+                    <span class="score-badge">Score: 89.5/100</span>
+                </div>
+                <h2 class="dossier-title">Trucking & Regional Freight Logistics WhatsApp Group Order Ingestion & ERP Sync Bot</h2>
+            </header>
+
+            <div class="metrics-grid">
+                <div class="metric-cell">
+                    <div class="metric-label">Pain Intensity</div>
+                    <div class="metric-value">8/10</div>
+                </div>
+                <div class="metric-cell">
+                    <div class="metric-label">Willingness To Pay</div>
+                    <div class="metric-value">9/10</div>
+                </div>
+                <div class="metric-cell">
+                    <div class="metric-label">Founder-Problem Fit</div>
+                    <div class="metric-value">10/10</div>
+                </div>
+                <div class="metric-cell">
+                    <div class="metric-label">Competition Whitespace</div>
+                    <div class="metric-value">9/10</div>
+                </div>
+                <div class="metric-cell">
+                    <div class="metric-label">Day-1 Feasibility</div>
+                    <div class="metric-value">9/10</div>
+                </div>
+            </div>
+
+            <section class="dossier-section">
+                <h3>The Real-World Bleeding Neck Problem</h3>
+                <p class="highlight-p">Mid-sized suppliers and distributors in Jaipur receive 200+ daily orders across 15 noisy WhatsApp groups. Orders get buried, leading to delayed fulfillment, double shipments, and 5-8% customer churn.</p>
+            </section>
+
+            <section class="dossier-section">
+                <h3>Target Customer & Who Pays</h3>
+                <p>Wholesale Suppliers, Spare Parts Distributors, and Job Shops in Jaipur</p>
+            </section>
+
+            <section class="dossier-section">
+                <h3>Current Broken / Clumsy Workarounds</h3>
+                <p>Employees spend all day scrolling through chat groups, manually scribbling order notes on paper pads.</p>
+            </section>
+
+            <section class="dossier-section unfair-edge-box">
+                <h3>Founder's Unfair Advantage (Founder-Problem Fit)</h3>
+                <p>Your proficiency in [Iot, Python, FastAPI, PostgreSQL, Next.js, Basic IoT & Hardware Prototyping (ESP32, GSM modems), Data extraction & Workflow automation] enables you to deploy a WhatsApp Cloud API parser that extracts structured orders directly into database records.</p>
+            </section>
+
+            <section class="dossier-section">
+                <h3>48-Hour Day-1 to Day-3 Validation Blueprint (No Heavy Code)</h3>
+                <ol class="action-list">
+                    <li>DIRECT ACTION: Meet 2 wholesale suppliers in Jaipur.</li><li>THE MOM TEST: 'How often do your clerks miss an order or send the wrong items because it was buried in a WhatsApp chat?'</li><li>DAY 1 (48h Validation): Connect a WhatsApp webhook that auto-acknowledges order messages and posts them to a Google Sheet.</li><li>DAY 2 CONCIERGE PROOF: Process 50 live orders without a single dropped message.</li><li>DAY 3 CLOSE: Onboard the business for ₹5,999/month.</li>
+                </ol>
+            </section>
+
+            
+            <section class="dossier-section tech-blueprint-box">
+                <div class="tech-blueprint-header">
+                    <span class="badge-high-ticket">High-Ticket B2B Tech &bull; Anti-Freelancing</span>
+                    <span class="badge-mrr">₹1,50,000 - ₹3,60,000 / month with 20-25 distributor clients</span>
+                </div>
+                <h3>High-Ticket Tech Architecture & Anti-Freelancing Blueprint</h3>
+                <pre class="blueprint-code">Architecture: Edge-to-Cloud Telemetry & Automation Hub
+Scaling: NEVER bill hourly. Always sell an unkillable business outcome.</pre>
+            </section>
+            
+
+            <div class="execution-footer">
+                <div>
+                    <strong>Lean Tech Stack:</strong>
+                    <div class="tech-container"><span class='tech-badge'>Python</span><span class='tech-badge'>FastAPI</span><span class='tech-badge'>WhatsApp Cloud API</span><span class='tech-badge'>PostgreSQL</span></div>
+                </div>
+                <div class="monetization-block">
+                    <strong>Pricing & Monetization Model:</strong>
+                    <span>₹5,999 to ₹11,999/month per business account.</span>
+                </div>
+            </div>
+        </article>
+        
+        </div>
+
+        <footer>
+            Opportunity Scout &bull; Formatted with Classical UI Harmony &bull; Generated 2026-09-16 13:03:08
+        </footer>
+    </div>
+</body>
+</html>
