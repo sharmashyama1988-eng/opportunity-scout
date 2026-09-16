@@ -23,12 +23,26 @@ def build_vector_opportunity_catalog(
     skills_str = ", ".join(profile.hard_skills) if profile.hard_skills else "Generalist Problem Solving"
     advantage = profile.unfair_advantages[0] if profile.unfair_advantages else f"Boots-on-the-ground local presence in {location}"
     lang = profile.language or "English"
+    is_hinglish = "hinglish" in lang.lower()
     lh = get_localized_headers(lang)
 
-    # Filter user's hard skills into a lean tech stack
-    tech_stack = [s for s in profile.hard_skills if any(t in s.lower() for t in ["python", "fastapi", "postgre", "next", "sql", "react", "node", "docker", "iot"])]
-    if not tech_stack:
-        tech_stack = ["Python", "FastAPI", "PostgreSQL", "Next.js"]
+    def pick_stack(preferred: List[str]) -> List[str]:
+        stack = []
+        for pref in preferred:
+            for s in profile.hard_skills:
+                if pref.lower() in s.lower() or s.lower() in pref.lower():
+                    if s not in stack:
+                        stack.append(s)
+                    break
+            else:
+                stack.append(pref)
+        return stack[:5]
+
+    tech_stack = pick_stack(["Python", "FastAPI", "PostgreSQL", "React", "Next.js"])
+    stack_network = pick_stack(["C++", "Go", "Windows Desktop App development", "Network socket monitoring", "Python"])
+    stack_agent = pick_stack(["Python", "Google Gemini API", "OpenRouter", "React", "FastAPI"])
+    stack_edge = pick_stack(["Hardware", "C++", "Python", "Go", "Network socket monitoring"])
+    stack_desktop = pick_stack(["C++", "Go", "Windows Desktop App development", "Multithreading", "Memory optimization"])
 
     def make_scores(intensity=9, wtp=9, whitespace=9, feasibility=9) -> OpportunityScores:
         fit = 10 if profile.unfair_advantages else (9 if len(profile.hard_skills) >= 2 else 8)
@@ -45,7 +59,7 @@ def build_vector_opportunity_catalog(
     catalog: Dict[str, OpportunityDossier] = {}
 
     # 1. Spreadsheet Hell & Manual Data Re-entry
-    t1 = f"{domain} Excel-to-WhatsApp Autonomous Ingestion Bridge"
+    t1 = "Excel-to-WhatsApp Autonomous Ingestion Bridge"
     b1 = generate_high_ticket_tech_blueprint(t1, f"Billing Heads & Dispatch Clerks in {location}", profile.hard_skills)
     catalog["SpreadsheetHellAlgorithm"] = OpportunityDossier(
         id="vec-01",
@@ -356,6 +370,158 @@ def build_vector_opportunity_catalog(
         earning_potential="₹1,50,000 - ₹3,50,000 / month with 15-20 factory clients"
     )
 
+    # 13. Enterprise Network Bandwidth & Socket Telemetry Guardian
+    t13 = "Enterprise Bandwidth Abuse & Socket Telemetry Guardian"
+    b13 = generate_high_ticket_tech_blueprint(t13, f"IT Heads and Network Administrators in {location}", profile.hard_skills)
+    catalog["NetworkBandwidthSentinelAlgorithm"] = OpportunityDossier(
+        id="vec-13",
+        title=t13,
+        problem_statement=(
+            f"{location} ke distributed offices aur enterprise branches mein unmonitored background downloads, rogue software aur silent socket leaks ki wajah se VPN aur critical tools hang hote hain, jisse daily operational downtime hota hai."
+            if is_hinglish else
+            f"Distributed enterprise branches and remote backoffices around {location} suffer persistent VPN slowdowns and VoIP drops caused by rogue background processes and unmonitored socket leaks without endpoint visibility."
+        ),
+        target_customer=f"IT Directors, MSP Owners, and Operations Heads in {location}",
+        why_it_is_real=["Branch offices routinely face 40% bandwidth degradation from untracked background network processes."],
+        current_workarounds=(
+            "Network admins router ko andhe mein reboot karte hain ya staff ko phone Wi-Fi band karne ko bolte hain, kisi ko pata nahi hota kaunsa device network choos raha hai."
+            if is_hinglish else
+            "Network admins rebooting routers blindly or asking employees to turn off Wi-Fi on their phones."
+        ),
+        scores=make_scores(intensity=9, wtp=9),
+        founder_advantage_explanation=(
+            f"Aapki deep systems aur socket programming capability [{skills_str}] aapko 1 ghante mein ultra-lightweight Windows socket monitor daemon deploy karne ka unfair advantage deti hai."
+            if is_hinglish else
+            f"Your deep systems and socket programming background in [{skills_str}] allows you to deploy a lightweight background agent operable in seconds."
+        ),
+        is_high_ticket_tech=profile.is_tech_user,
+        high_ticket_tech_blueprint=f"Architecture: {b13['architecture_name']}\nScaling: {b13['anti_freelancing_rule']}",
+        day1_validation_plan=[
+            f"DIRECT ACTION: Meet 2 IT managers or BPO backoffice heads in {location}.",
+            "THE MOM TEST: 'When your office network choked last week, how did you determine which workstation was hogging the connection?'",
+            "DAY 1 (48h Validation): Deploy a lightweight 1-file socket telemetry script on 5 office endpoints.",
+            "DAY 2 CONCIERGE PROOF: Isolate 12GB of unauthorized P2P/sync traffic in 10 minutes.",
+            "DAY 3 CLOSE: Sign a recurring monitoring retainer at ₹499/endpoint/month."
+        ],
+        mvp_tech_stack=stack_network,
+        monetization="₹499/endpoint/month or ₹8,999/month per branch facility.",
+        earning_potential="₹1,80,000 - ₹4,00,000 / month across 20 enterprise branch accounts"
+    )
+
+    # 14. Autonomous Multi-Agent Backoffice Reconciliation Pipeline
+    t14 = "Autonomous Multi-Agent Reconciliation & Workflow Pipeline"
+    b14 = generate_high_ticket_tech_blueprint(t14, f"Operations Heads and Backoffice Managers in {location}", profile.hard_skills)
+    catalog["MultiAgentReconciliationAlgorithm"] = OpportunityDossier(
+        id="vec-14",
+        title=t14,
+        problem_statement=(
+            f"{location} ke backoffices aur trade operations mein staff har hafte 20-30 ghante alag-alag vendor portals, emails aur WhatsApp chats se data copy-paste karne mein gawa deta hai, jisme 8% clerical errors hote hain."
+            if is_hinglish else
+            f"Backoffices and logistics hubs around {location} employ analysts who waste 20-30 hours weekly copying data between supplier portals, emails, and internal databases, suffering an 8% clerical error rate."
+        ),
+        target_customer=f"Backoffice Operations Heads, Trade Brokers, and Logistics Hub Managers in {location}",
+        why_it_is_real=["Manual copy-pasting across disparate enterprise systems creates 15% fulfillment delays and billing errors."],
+        current_workarounds=(
+            "Teams shared Google Sheets aur messy Excel workbooks mein order IDs aur payment status rows manually match karti rehti hain."
+            if is_hinglish else
+            "Teams of clerks copying order IDs and status rows into shared Google Sheets and Excel workbooks."
+        ),
+        scores=make_scores(intensity=9, wtp=9),
+        founder_advantage_explanation=(
+            f"Aapki multi-agent pipeline engineering aur [{skills_str}] capability ki madad se aap self-healing automation workflows bana sakte hain jo bina kisi manual intervention ke chalte hain."
+            if is_hinglish else
+            f"Your expertise in [{skills_str}] and multi-agent pipeline engineering enables you to build self-healing automation workflows."
+        ),
+        is_high_ticket_tech=profile.is_tech_user,
+        high_ticket_tech_blueprint=f"Architecture: {b14['architecture_name']}\nScaling: {b14['anti_freelancing_rule']}",
+        day1_validation_plan=[
+            f"DIRECT ACTION: Shadow a backoffice clerk at an SME or agency in {location} for 2 hours.",
+            "THE MOM TEST: 'How many hours did your team spend yesterday cross-checking data between supplier portals and your internal records?'",
+            "DAY 1 (48h Validation): Build an automated parser agent that extracts and cross-verifies 50 records.",
+            "DAY 2 CONCIERGE PROOF: Save 15 hours of manual labor in a single morning shift.",
+            "DAY 3 CLOSE: Onboard the client for ₹14,999/month automation retainer."
+        ],
+        mvp_tech_stack=stack_agent,
+        monetization="₹14,999 to ₹29,999/month recurring automation retainer.",
+        earning_potential="₹1,50,000 - ₹4,50,000 / month with 10-15 enterprise clients"
+    )
+
+    # 15. Industrial Edge Microcontroller Telemetry & Silent Failure Sentinel
+    t15 = "Industrial Edge Microcontroller Telemetry & Silent Failure Sentinel"
+    b15 = generate_high_ticket_tech_blueprint(t15, f"Plant Supervisors and Hardware Maintenance Engineers in {location}", profile.hard_skills)
+    catalog["EdgeHardwareTelemetryAlgorithm"] = OpportunityDossier(
+        id="vec-15",
+        title=t15,
+        problem_statement=(
+            f"{location} ke factories aur utility setups mein लगे microcontroller sensors silent socket timeouts aur firmware memory hang ki wajah se 3 din tak disconnect rehte hain, jisse bina warning machine breakdown hota hai."
+            if is_hinglish else
+            f"Industrial facilities and utility installations around {location} rely on microcontroller sensors that suffer silent GSM socket timeouts and firmware memory locks, causing 3-day data blackouts and unpredicted machine breakdown."
+        ),
+        target_customer=f"Plant Maintenance Heads, Solar/Utility Operators, and Factory Supervisors in {location}",
+        why_it_is_real=["Silent telemetry dropouts cause unpredicted motor burnout and emergency repair bills exceeding ₹1.5L."],
+        current_workarounds=(
+            "Technicians hafte mein ek baar site par jaakar dekhte hain jab machine pehle se hi overheat ho chuki hoti hai."
+            if is_hinglish else
+            "Technicians manually visiting sites days later when machines have already overheated or failed."
+        ),
+        scores=make_scores(intensity=10, wtp=9),
+        founder_advantage_explanation=(
+            f"Aapki hybrid software-hardware mastery [{skills_str}] aur microcontrollers ki practical knowledge aapko resilient watchdog firmware aur live telemetry brokers khade karne ka direct edge deti hai."
+            if is_hinglish else
+            f"Your hybrid software-hardware mastery in [{skills_str}] gives you unique capability to deploy resilient watchdog firmware and telemetry brokers."
+        ),
+        is_high_ticket_tech=profile.is_tech_user,
+        high_ticket_tech_blueprint=f"Architecture: {b15['architecture_name']}\nScaling: {b15['anti_freelancing_rule']}",
+        day1_validation_plan=[
+            f"DIRECT ACTION: Visit a manufacturing or utility site in {location}.",
+            "THE MOM TEST: 'How do you know right now whether all your remote sensors and telemetry nodes are actively transmitting?'",
+            "DAY 1 (48h Validation): Flash an ESP32/gateway with an auto-reconnecting watchdog script.",
+            "DAY 2 CONCIERGE PROOF: Detect a silent GSM drop and trigger an instant SMS alert to the plant manager.",
+            "DAY 3 CLOSE: Deploy the diagnostic sentinel across 10 machines for ₹9,999/month."
+        ],
+        mvp_tech_stack=stack_edge,
+        monetization="₹9,999/month per facility plus ₹499/node hardware maintenance.",
+        earning_potential="₹1,80,000 - ₹4,00,000 / month across 15-20 factory facilities"
+    )
+
+    # 16. Desktop Multi-GB Asset Sync & Lock Contention Accelerator
+    t16 = "Desktop Multi-GB Asset Sync & Lock Contention Accelerator"
+    b16 = generate_high_ticket_tech_blueprint(t16, f"Studio Directors and Engineering Leads in {location}", profile.hard_skills)
+    catalog["DesktopAssetSyncAlgorithm"] = OpportunityDossier(
+        id="vec-16",
+        title=t16,
+        problem_statement=(
+            f"{location} ke design studios aur engineering firms mein 5GB+ heavy project files sync karte waqt file-lock collisions aur corrupted delta uploads ki wajah se daily 45 minutes barbaad hote hain."
+            if is_hinglish else
+            f"Creative agencies, architectural design studios, and engineering firms in {location} waste 45 minutes per designer daily dealing with file-lock collisions and corrupted delta uploads when synchronizing heavy 5GB+ asset folders to cloud storage."
+        ),
+        target_customer=f"Creative Directors, Architecture Studio Principals, and Engineering Teams in {location}",
+        why_it_is_real=["Multi-user simultaneous editing on shared project directories causes daily file overwrites and lost design revisions."],
+        current_workarounds=(
+            "Designers ek dusre par chillate hain 'Bhai project file open mat karna main save kar raha hoon'."
+            if is_hinglish else
+            "Designers shouting across the room 'Hey, are you working on that project file right now?'"
+        ),
+        scores=make_scores(intensity=8, wtp=9),
+        founder_advantage_explanation=(
+            f"Aapki Microsoft Store published desktop utilities banana aur [{skills_str}] systems knowledge aapko C++/Go mein atomic zero-overhead local locking daemon banane ka absolute advantage deta hai."
+            if is_hinglish else
+            f"Your published desktop systems engineering background in [{skills_str}] allows you to build atomic file-locking daemons directly in C++/Go/Python."
+        ),
+        is_high_ticket_tech=profile.is_tech_user,
+        high_ticket_tech_blueprint=f"Architecture: {b16['architecture_name']}\nScaling: {b16['anti_freelancing_rule']}",
+        day1_validation_plan=[
+            f"DIRECT ACTION: Visit a 15-person design or engineering studio in {location}.",
+            "THE MOM TEST: 'How often do team members accidentally overwrite each other's work or wait for cloud sync to finish?'",
+            "DAY 1 (48h Validation): Install a lightweight local sync coordinator on 3 designer workstations.",
+            "DAY 2 CONCIERGE PROOF: Prevent a file-lock conflict on a live client deliverable.",
+            "DAY 3 CLOSE: Sign studio license at ₹7,999/month."
+        ],
+        mvp_tech_stack=stack_desktop,
+        monetization="₹7,999 to ₹18,000/month per studio license.",
+        earning_potential="₹1,50,000 - ₹3,60,000 / month with 20 studio accounts"
+    )
+
     return catalog
 
 
@@ -364,14 +530,73 @@ def sample_diverse_opportunities(
     signals: List[PainPointSignal],
     count: int = 3
 ) -> List[OpportunityDossier]:
-    """Dynamically samples distinct, non-repeating opportunities from the 21-vector registry.
-    Guarantees every run produces different, bespoke opportunities tailored to the founder.
+    """Dynamically samples distinct, non-repeating opportunities from the vector registry,
+    strictly tailored to the founder's proven domain, skills, and unfair advantages.
     """
     catalog = build_vector_opportunity_catalog(profile, signals)
-    available_keys = list(catalog.keys())
+    domain_tokens = " ".join(profile.domains).lower()
+    all_tokens = (domain_tokens + " " + " ".join(profile.hard_skills)).lower()
 
-    # Randomly select 'count' distinct algorithms
-    selected_keys = random.sample(available_keys, min(count, len(available_keys)))
+    SYSTEMS_KEYS = [
+        "NetworkBandwidthSentinelAlgorithm",
+        "MultiAgentReconciliationAlgorithm",
+        "EdgeHardwareTelemetryAlgorithm",
+        "DesktopAssetSyncAlgorithm",
+        "SpreadsheetHellAlgorithm",
+        "InvoiceLeakageAlgorithm"
+    ]
+    LOGISTICS_KEYS = [
+        "EWaybillDetentionAlgorithm",
+        "DieselSiphoningAlgorithm",
+        "DemurrageDetectionAlgorithm",
+        "ColdChainSpoilageAlgorithm",
+        "WeighbridgeAxleFraudAlgorithm",
+        "DispatchPhotoDamageAlgorithm"
+    ]
+    MANUFACTURING_KEYS = [
+        "BatchVariationAlgorithm",
+        "MachineDowntimeAlgorithm",
+        "SecondaryScrapYieldAlgorithm",
+        "ContractLaborFraudAlgorithm",
+        "SubcontractorReconciliationAlgorithm"
+    ]
+    WHOLESALE_KEYS = [
+        "DisputedChallanKhataAlgorithm",
+        "WhatsAppOrderIngestionAlgorithm",
+        "ExpiredStockReturnAlgorithm",
+        "SpreadsheetHellAlgorithm",
+        "InvoiceLeakageAlgorithm"
+    ]
+
+    candidate_keys: List[str] = []
+    if any(k in domain_tokens for k in ["logistics", "trucking", "transport", "freight", "fleet"]):
+        candidate_keys.extend(LOGISTICS_KEYS)
+    if any(k in domain_tokens for k in ["manufacturing", "stone", "marble", "factory", "plant", "textile", "steel"]):
+        candidate_keys.extend(MANUFACTURING_KEYS)
+    if any(k in domain_tokens for k in ["wholesale", "distribution", "distributor", "khata", "retail"]):
+        candidate_keys.extend(WHOLESALE_KEYS)
+    if any(k in all_tokens for k in ["network", "bandwidth", "desktop", "systems", "c++", "go", "socket", "telemetry", "hardware", "microcontroller", "ai"]):
+        candidate_keys.extend(SYSTEMS_KEYS)
+
+    if not candidate_keys:
+        candidate_keys = list(catalog.keys())
+
+    # Filter to available keys in catalog and preserve uniqueness
+    available_keys = [k for k in dict.fromkeys(candidate_keys) if k in catalog]
+    if len(available_keys) < count:
+        available_keys = list(catalog.keys())
+
+    pure_tech_keys = [k for k in available_keys if k in [
+        "NetworkBandwidthSentinelAlgorithm",
+        "MultiAgentReconciliationAlgorithm",
+        "EdgeHardwareTelemetryAlgorithm",
+        "DesktopAssetSyncAlgorithm"
+    ]]
+    if len(pure_tech_keys) >= count:
+        selected_keys = random.sample(pure_tech_keys, count)
+    else:
+        selected_keys = random.sample(available_keys, min(count, len(available_keys)))
+
     selected_dossiers = [catalog[k] for k in selected_keys]
 
     # Re-index IDs

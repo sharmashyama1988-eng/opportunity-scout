@@ -24,6 +24,40 @@ from oppscout.tools import generate_high_ticket_tech_blueprint
 load_dotenv()
 logger = logging.getLogger("oppscout.analyzer")
 
+GEMINI_SYSTEM_PROMPT = """You are an elite Venture Partner, Principal Systems Architect, and B2B Operational Strategist.
+Your sole mission is to analyze the founder's exact background, technical capabilities, location, and unfair network advantages, against live mined market pain signals, to discover 3 highly specific, non-obvious, unsexy B2B operational opportunities.
+
+CRITICAL ARCHITECTURAL DIRECTIVES:
+1. STRICT FOUNDER GROUNDING (Zero Generic Ideas):
+   - Every opportunity MUST directly weaponize the founder's specific hard skills, published utilities, hardware/software stack, and unfair advantages.
+   - If the founder has Systems, Desktop, Network, C++, Go, Windows API, or Microcontroller/Edge skills: Focus on enterprise network telemetry, bandwidth abuse monitoring, desktop asset sync acceleration, edge hardware watchdog diagnostics, or resilient multi-agent backoffice pipelines.
+   - If the founder has Logistics, Freight, or Transportation footholds: Focus on E-Waybill detention, fuel reconciliation, demurrage, or proof-of-delivery.
+   - If the founder has Manufacturing or Industrial processing footholds: Focus on batch shade variation, machine downtime, or scrap shrinkage.
+   - NEVER output generic ideas: Ban generic CRMs, simple ChatGPT wrappers, food delivery, generic todo/social apps.
+
+2. ANTI-FREELANCING HIGH-TICKET B2B TECH:
+   - Strictly prohibit hourly freelancing (Fiverr/Upwork gigs).
+   - Direct the founder to build high-margin software & automation infrastructure earning ₹1,50,000 to ₹4,00,000+ / month on recurring retainers or unkillable outcome-based contracts.
+
+3. UNSEXY OPERATIONAL FRICTION & BLEEDING-NECK PAIN:
+   - Target operations where businesses lose money daily: manual data entry errors, silent edge disconnects, bandwidth siphoning, compliance fines, lost paper proofs.
+
+4. ZERO GUESSWORK EXECUTION BLUEPRINT:
+   - Target Customer Avatar: Specific job title and facility/company type.
+   - The Mom Test Script: Verbatim diagnostic opening question in the founder's requested language.
+   - 48-Hour Day 1-3 Plan: Concrete ground audit (Day 1), concierge proof (Day 2), pre-order close (Day 3).
+   - Explicit Pricing Formula: Monthly subscription or contingency fee.
+
+5. NATIVE LANGUAGE FIDELITY:
+   - Write the ENTIRE JSON response (titles, problem_statement, target_customer, current_workarounds, founder_advantage_explanation, day1_validation_plan, and monetization) natively and fluently in '{lang}'.
+   - If '{lang}' is 'Hinglish': Use crisp, professional Roman Hindi mixed with English business/tech terms.
+   - If '{lang}' is 'Hindi': Use natural, high-impact Devanagari script (हिन्दी).
+   - If '{lang}' is English or any other language: Write in native, articulate professional phrasing.
+
+6. STRICT JSON ARRAY OUTPUT:
+   - Respond ONLY with a valid JSON array of 3 objects conforming to the OpportunityDossier schema.
+"""
+
 
 class OpportunityAnalyzer:
     """Evaluates mined market signals against the user's exact profile
@@ -32,8 +66,9 @@ class OpportunityAnalyzer:
 
     def __init__(self):
         self.openrouter_key = os.getenv("OPENROUTER_API_KEY")
-        self.openrouter_model = os.getenv("OPENROUTER_MODEL", "google/gemma-4-26b-a4b-it:free")
-        self.gemini_key = os.getenv("GEMINI_API_KEY")
+        self.openrouter_model = os.getenv("OPENROUTER_MODEL", "nex-agi/nex-n2.5-pro:free")
+        self.gemini_key = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
+        self.gemini_model = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
 
     def _calculate_scores(
         self,
@@ -91,68 +126,205 @@ class OpportunityAnalyzer:
         from oppscout.vector_synthesizer import sample_diverse_opportunities
         return sample_diverse_opportunities(profile, signals, count=3)
 
-    async def _synthesize_with_openrouter(
-        self, profile: UserProfile, signals: List[PainPointSignal]
-    ) -> Optional[List[OpportunityDossier]]:
-        """Queries OpenRouter API for deep model-driven synthesis with dynamic vector injection and multi-model fallback."""
-        if not self.openrouter_key:
+    def _normalize_dossier_dict(self, item: dict, idx: int, profile: UserProfile) -> Optional[OpportunityDossier]:
+        """Defensively normalizes and validates an LLM-generated dictionary into an OpportunityDossier."""
+        if not isinstance(item, dict):
+            return None
+        try:
+            opp_id = str(item.get("id") or f"opp-0{idx+1}")
+            title = str(item.get("title") or f"B2B Operational Opportunity #{idx+1}").strip()
+            problem_statement = str(
+                item.get("problem_statement") or item.get("problem") or "Critical operational friction causing recurring margin leakage."
+            ).strip()
+            target_customer = str(item.get("target_customer") or item.get("customer") or "SMB and Enterprise Operators").strip()
+
+            why_raw = item.get("why_it_is_real") or item.get("market_signals") or []
+            if isinstance(why_raw, str):
+                why_it_is_real = [s.strip() for s in why_raw.split("\n") if s.strip()] or [why_raw]
+            elif isinstance(why_raw, list):
+                why_it_is_real = [str(x).strip() for x in why_raw if str(x).strip()]
+            else:
+                why_it_is_real = ["Observed repeatedly across operational field audits and industry workflows."]
+            if not why_it_is_real:
+                why_it_is_real = ["Direct real-world friction observed in operator workflows."]
+
+            current_workarounds = str(
+                item.get("current_workarounds") or "Manual data copying across spreadsheets and informal messaging groups."
+            ).strip()
+
+            raw_scores = item.get("scores")
+            if not isinstance(raw_scores, dict):
+                raw_scores = {}
+
+            def _to_int(val, default=9):
+                try:
+                    return max(1, min(10, int(val)))
+                except Exception:
+                    return default
+
+            pain = _to_int(raw_scores.get("pain_intensity"), 9)
+            wtp = _to_int(raw_scores.get("willingness_to_pay"), 9)
+            fit = _to_int(raw_scores.get("founder_fit"), 10 if profile.unfair_advantages else 9)
+            white = _to_int(raw_scores.get("whitespace"), 9)
+            feas = _to_int(raw_scores.get("day1_feasibility"), 9)
+
+            try:
+                comp = float(raw_scores.get("composite_score", (pain * 3.0 + wtp * 2.5 + fit * 2.5 + white * 1.0 + feas * 1.0)))
+            except Exception:
+                comp = round(pain * 3.0 + wtp * 2.5 + fit * 2.5 + white * 1.0 + feas * 1.0, 1)
+            comp = round(min(max(comp, 0.0), 99.0), 1)
+
+            scores = OpportunityScores(
+                pain_intensity=pain,
+                willingness_to_pay=wtp,
+                founder_fit=fit,
+                whitespace=white,
+                day1_feasibility=feas,
+                composite_score=comp,
+            )
+
+            founder_advantage = str(
+                item.get("founder_advantage_explanation")
+                or item.get("founder_advantage")
+                or f"Founder's direct technical execution capability in {', '.join(profile.hard_skills[:4])} creates a defensible edge."
+            ).strip()
+
+            plan_raw = item.get("day1_validation_plan") or item.get("validation_plan") or []
+            if isinstance(plan_raw, str):
+                day1_validation_plan = [s.strip() for s in plan_raw.split("\n") if s.strip()] or [plan_raw]
+            elif isinstance(plan_raw, list):
+                day1_validation_plan = [str(x).strip() for x in plan_raw if str(x).strip()]
+            else:
+                day1_validation_plan = ["Conduct 5 exploratory operator interviews using The Mom Test framework."]
+            if not day1_validation_plan:
+                day1_validation_plan = ["Conduct 5 exploratory operator interviews using The Mom Test framework."]
+
+            stack_raw = item.get("mvp_tech_stack") or item.get("tech_stack") or []
+            if isinstance(stack_raw, str):
+                mvp_tech_stack = [s.strip() for s in stack_raw.split(",") if s.strip()] or [stack_raw]
+            elif isinstance(stack_raw, list):
+                mvp_tech_stack = [str(x).strip() for x in stack_raw if str(x).strip()]
+            else:
+                mvp_tech_stack = profile.hard_skills[:4] if profile.hard_skills else ["Python", "FastAPI"]
+            if not mvp_tech_stack:
+                mvp_tech_stack = profile.hard_skills[:4] if profile.hard_skills else ["Python", "FastAPI"]
+
+            monetization = str(item.get("monetization") or "B2B SaaS retainer with upfront pilot deposit.").strip()
+            earning = str(item.get("earning_potential") or "₹1,50,000 - ₹3,50,000 / month with 15-20 clients").strip()
+
+            return OpportunityDossier(
+                id=opp_id,
+                title=title,
+                problem_statement=problem_statement,
+                target_customer=target_customer,
+                why_it_is_real=why_it_is_real,
+                current_workarounds=current_workarounds,
+                scores=scores,
+                founder_advantage_explanation=founder_advantage,
+                is_high_ticket_tech=item.get("is_high_ticket_tech", True),
+                high_ticket_tech_blueprint=item.get("high_ticket_tech_blueprint"),
+                day1_validation_plan=day1_validation_plan,
+                mvp_tech_stack=mvp_tech_stack,
+                monetization=monetization,
+                earning_potential=earning,
+            )
+        except Exception as err:
+            logger.debug(f"Failed normalizing dossier item: {err}")
             return None
 
-        import random
-        from oppscout.algorithms import SpecializedSearchAlgorithms
+
+    async def _synthesize_with_gemini_direct(
+        self, profile: UserProfile, signals: List[PainPointSignal]
+    ) -> Optional[List[OpportunityDossier]]:
+        """Direct high-speed call to Google's official Gemini API (e.g. gemini-2.5-flash)."""
+        if not self.gemini_key:
+            return None
 
         lang = profile.language or "English"
-        signals_text = "\n".join([f"- [{s.source}] {s.title}: {s.snippet}" for s in signals[:5]])
+        signals_text = "\n".join([f"- [{s.source}] {s.title}: {s.snippet}" for s in signals[:6]])
 
-        # Generate unique seed & sample 3 distinct friction vectors to guarantee run-to-run diversity
-        run_seed = random.randint(10000, 99999)
-        algo_keys = list(SpecializedSearchAlgorithms.ALGORITHMS_REGISTRY.keys())
-        sampled_keys = random.sample(algo_keys, min(3, len(algo_keys)))
-        chosen_vectors = [SpecializedSearchAlgorithms.ALGORITHMS_REGISTRY[k] for k in sampled_keys]
-        vectors_instruction = "\n".join([
-            f"  • Vector {i+1} ({v['name']}): {v['focus']} (Economic threat: {v['typical_leakage']})"
-            for i, v in enumerate(chosen_vectors)
-        ])
-
-        top_advantage = profile.unfair_advantages[0] if profile.unfair_advantages else f"Boots-on-the-ground local network in {profile.location}"
-
-        prompt = f"""You are an elite operational venture architect and high-ticket B2B engineer.
-Analyze this founder profile against verified real-world market signals.
-Generate EXACTLY 3 highly specific, non-obvious, unsexy B2B/operational opportunities.
-
-MANDATORY DIVERSITY & FRESHNESS DIRECTIVE (Run Seed #{run_seed}):
-Every single run must produce fresh, distinct, and creative opportunities!
-Do NOT repeat standard toll, diesel, or generic invoice ideas.
-In this run, you MUST explore and solve these 3 specific operational friction vectors:
-{vectors_instruction}
-
-MANDATORY LANGUAGE DIRECTIVE:
-The user selected '{lang}'. You MUST generate the ENTIRE JSON response (all titles, problem_statement, target_customer, current_workarounds, founder_advantage_explanation, day1_validation_plan, and monetization) natively, fluently, and professionally in '{lang}'.
-- If '{lang}' is 'Hinglish': Use crisp, practical Roman Hindi mixed with English business/tech terms (natural startup founder tone).
-- If '{lang}' is 'Hindi': Use natural, high-impact Devanagari script (हिन्दी).
-- If '{lang}' is any other global language: Use high-precision, native business terminology of that exact language.
-- Ensure natural phrasing and completely eliminate clumsy machine-translation artifacts.
-
-MANDATORY OPERATIONAL RULES:
-1. ZERO GENERIC IDEAS: No 'AI chatbots', no 'food delivery', no 'generic CRM', no 'fitness tracker'.
-2. EVERY problem MUST be a real, bleeding-neck operational friction with urgent willingness to pay.
-3. DIRECTLY WEAPONIZE the user's specific hard skills, location, and unfair advantage ('{top_advantage}').
-4. TELL THE USER EXACTLY WHAT TO DO (Zero guesswork):
-   - Exactly which person / industrial facility to visit.
-   - The verbatim Mom Test interview question to ask (written in '{lang}').
-   - Day 1, Day 2, Day 3 step-by-step 48-hour validation without heavy coding.
-   - Exact pricing and monetization.
-
-FOUNDER PROFILE:
+        system_prompt = GEMINI_SYSTEM_PROMPT.replace("{lang}", lang)
+        user_prompt = f"""FOUNDER STRATEGIC PROFILE:
+- Name: {profile.name}
 - Preferred Language: {lang}
 - Hard Skills: {', '.join(profile.hard_skills)}
 - Location: {profile.location}
 - Unfair Advantages: {', '.join(profile.unfair_advantages)}
-- Target Domains: {', '.join(profile.domains)}
+- Target Domains & Field: {', '.join(profile.domains)}
 
-MINED REAL SIGNALS:
+MINED REAL-WORLD PAIN SIGNALS (FROM DDGS, REDDIT & HACKERNEWS):
 {signals_text}
 
+Generate EXACTLY 3 bespoke, high-ticket B2B operational opportunities strictly grounded in this founder's exact skills and domains.
+Output ONLY a valid JSON array of 3 objects conforming to the OpportunityDossier schema."""
+
+        models_to_try = [self.gemini_model, "gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"]
+        models_to_try = list(dict.fromkeys([m for m in models_to_try if m]))
+
+        for model in models_to_try:
+            endpoint = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={self.gemini_key}"
+            payload = {
+                "systemInstruction": {
+                    "parts": [{"text": system_prompt}]
+                },
+                "contents": [
+                    {"role": "user", "parts": [{"text": user_prompt}]}
+                ],
+                "generationConfig": {
+                    "temperature": 0.85,
+                    "responseMimeType": "application/json"
+                }
+            }
+
+            try:
+                async with httpx.AsyncClient(timeout=httpx.Timeout(10.0, connect=2.5)) as client:
+                    resp = await client.post(endpoint, json=payload)
+                    if resp.status_code == 200:
+                        data = resp.json()
+                        candidates = data.get("candidates", [])
+                        if candidates:
+                            content = candidates[0].get("content", {}).get("parts", [{}])[0].get("text", "").strip()
+                            json_match = re.search(r'\[\s*\{.*\}\s*\]', content, re.DOTALL)
+                            if json_match:
+                                parsed = json.loads(json_match.group(0))
+                            else:
+                                parsed = json.loads(content)
+                            dossiers = []
+                            for idx, item in enumerate(parsed):
+                                norm = self._normalize_dossier_dict(item, idx, profile)
+                                if norm:
+                                    dossiers.append(norm)
+                            if len(dossiers) >= 3:
+                                logger.info(f"Successfully synthesized with native Google Gemini API ({model})")
+                                return dossiers[:3]
+            except Exception as e:
+                logger.debug(f"Gemini model {model} attempt failed: {e}")
+
+        return None
+
+    async def _synthesize_with_openrouter(
+        self, profile: UserProfile, signals: List[PainPointSignal]
+    ) -> Optional[List[OpportunityDossier]]:
+        """Queries OpenRouter API with multi-model fallback cascade."""
+        if not self.openrouter_key:
+            return None
+
+        lang = profile.language or "English"
+        signals_text = "\n".join([f"- [{s.source}] {s.title}: {s.snippet}" for s in signals[:6]])
+
+        system_prompt = GEMINI_SYSTEM_PROMPT.replace("{lang}", lang)
+        user_prompt = f"""FOUNDER STRATEGIC PROFILE:
+- Name: {profile.name}
+- Preferred Language: {lang}
+- Hard Skills: {', '.join(profile.hard_skills)}
+- Location: {profile.location}
+- Unfair Advantages: {', '.join(profile.unfair_advantages)}
+- Target Domains & Field: {', '.join(profile.domains)}
+
+MINED REAL-WORLD PAIN SIGNALS (FROM DDGS, REDDIT & HACKERNEWS):
+{signals_text}
+
+Generate EXACTLY 3 bespoke, high-ticket B2B operational opportunities strictly grounded in this founder's exact skills, domains, and geography.
 Respond ONLY in valid JSON array of 3 objects matching this schema:
 [
   {{
@@ -182,8 +354,8 @@ Respond ONLY in valid JSON array of 3 objects matching this schema:
     "monetization": "...",
     "earning_potential": "₹1,50,000 - ₹3,50,000 / month with 15-20 clients"
   }}
-]
-"""
+]"""
+
         headers = {
             "Authorization": f"Bearer {self.openrouter_key}",
             "HTTP-Referer": "https://github.com/opportunity-scout",
@@ -191,27 +363,30 @@ Respond ONLY in valid JSON array of 3 objects matching this schema:
             "Content-Type": "application/json"
         }
 
-        # Multi-model resilience: Try preferred model (Gemma 4 26B) first, with reliable backups
+        # Multi-model resilience: Fast, high-throughput models first
         candidate_models = [
-            self.openrouter_model,
-            "google/gemma-4-26b-a4b-it:free",
-            "nvidia/nemotron-3.5-lightning:free",
             "nex-agi/nex-n2.5-pro:free",
+            "nex-agi/nex-n2.5-mini:free",
+            "nvidia/nemotron-3.5-lightning:free",
             "cohere/north-mini-code:free",
+            "liquid/lfm-2.5-2.6b:free",
+            "z-ai/glm-5.2:free",
+            "google/gemma-4-26b-a4b-it:free",
         ]
-        models_to_try = list(dict.fromkeys([m for m in candidate_models if m]))
+        if self.openrouter_model and self.openrouter_model not in candidate_models:
+            candidate_models.insert(0, self.openrouter_model)
 
-        for model in models_to_try:
+        for model in candidate_models:
             try:
-                async with httpx.AsyncClient(timeout=httpx.Timeout(12.0, connect=3.0)) as client:
+                async with httpx.AsyncClient(timeout=httpx.Timeout(8.0, connect=2.5)) as client:
                     payload = {
                         "model": model,
                         "messages": [
-                            {"role": "system", "content": "You are an elite operational problem discovery engine. Output only valid JSON. Do NOT include thinking process or markdown text outside JSON."},
-                            {"role": "user", "content": prompt}
+                            {"role": "system", "content": system_prompt},
+                            {"role": "user", "content": user_prompt}
                         ],
                         "temperature": 0.85,
-                        "max_tokens": 1400
+                        "max_tokens": 1500
                     }
                     resp = await client.post(
                         "https://openrouter.ai/api/v1/chat/completions",
@@ -220,16 +395,16 @@ Respond ONLY in valid JSON array of 3 objects matching this schema:
                     )
                     if resp.status_code == 200:
                         content = resp.json().get("choices", [{}])[0].get("message", {}).get("content", "").strip()
-                        # Extract JSON array handling thinking tags and preambles
                         json_match = re.search(r'\[\s*\{.*\}\s*\]', content, re.DOTALL)
                         if json_match:
                             parsed = json.loads(json_match.group(0))
                             dossiers = []
-                            for item in parsed:
-                                if "earning_potential" not in item:
-                                    item["earning_potential"] = "₹1,50,000 - ₹3,50,000 / month with 15-20 clients"
-                                dossiers.append(OpportunityDossier(**item))
+                            for idx, item in enumerate(parsed):
+                                norm = self._normalize_dossier_dict(item, idx, profile)
+                                if norm:
+                                    dossiers.append(norm)
                             if len(dossiers) >= 3:
+                                logger.info(f"Successfully synthesized with OpenRouter model {model}")
                                 return dossiers[:3]
             except Exception as err:
                 logger.debug(f"Model {model} attempt skipped: {err}")
@@ -239,13 +414,17 @@ Respond ONLY in valid JSON array of 3 objects matching this schema:
     async def analyze_and_synthesize(
         self, profile: UserProfile, signals: List[PainPointSignal]
     ) -> AnalysisReport:
-        """Synthesizes high-conviction opportunities using OpenRouter or Algorithmic Engine."""
+        """Synthesizes high-conviction opportunities using Native Gemini, OpenRouter, or Algorithmic Engine."""
         from datetime import datetime
 
-        # Attempt OpenRouter intelligence synthesis first
-        dossiers = await self._synthesize_with_openrouter(profile, signals)
+        # 1. Attempt Native Google Gemini API first (gemini-2.5-flash)
+        dossiers = await self._synthesize_with_gemini_direct(profile, signals)
 
-        # Fallback to deterministic tailored algorithmic engine
+        # 2. Attempt OpenRouter model cascade
+        if not dossiers:
+            dossiers = await self._synthesize_with_openrouter(profile, signals)
+
+        # 3. Fallback to domain-tailored algorithmic engine
         if not dossiers:
             dossiers = self._synthesize_tailored_algorithmic(profile, signals)
 

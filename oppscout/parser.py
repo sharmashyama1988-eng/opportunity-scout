@@ -303,45 +303,52 @@ def extract_sections_heuristic(text: str) -> UserProfile:
 
         lower = stripped.lower()
 
-        # Check section headers
-        if re.search(r'(skills?|technologies|tools?|expertise|languages|competencies|stack)', lower) and (line.startswith("#") or ":" in line):
-            current_section = "skills"
-            continue
-        elif re.search(r'(domain|industry|interest|sector|area|field|market|vertical)', lower) and (line.startswith("#") or ":" in line):
-            current_section = "domain"
-            continue
-        elif re.search(r'(location|city|state|geography|region|place|address|where)', lower) and (line.startswith("#") or ":" in line):
-            current_section = "location"
-            continue
-        elif re.search(r'(advantage|network|connection|insider|family|access|moat|resource|assets|clients)', lower) and (line.startswith("#") or ":" in line):
-            current_section = "advantage"
-            continue
-        elif re.search(r'(budget|capital|money|funds?|investment)', lower) and (line.startswith("#") or ":" in line):
-            current_section = "capital"
-            continue
-        elif re.search(r'(time|hours?|availability|commitment)', lower) and (line.startswith("#") or ":" in line):
-            current_section = "time"
-            continue
+        # Check section headers: only lines starting with '#' or unbulleted short headers ending with ':'
+        is_bullet = stripped.startswith(("-", "*", "•", ">")) or bool(re.match(r'^\d+[\.\)]', stripped))
+        is_header = stripped.startswith("#") or (stripped.endswith(":") and not is_bullet and len(stripped.split()) <= 6)
+
+        if is_header:
+            if re.search(r'(skills?|technologies|tools?|expertise|languages|competencies|stack)', lower):
+                current_section = "skills"
+                continue
+            elif re.search(r'(domain|industry|interest|sector|area|field|market|vertical)', lower):
+                current_section = "domain"
+                continue
+            elif re.search(r'(location|city|state|geography|region|place|address|where)', lower):
+                current_section = "location"
+                continue
+            elif re.search(r'(advantage|network|connection|insider|family|access|moat|resource|assets|clients|proof)', lower):
+                current_section = "advantage"
+                continue
+            elif re.search(r'(budget|capital|money|funds?|investment)', lower):
+                current_section = "capital"
+                continue
+            elif re.search(r'(time|hours?|availability|commitment)', lower):
+                current_section = "time"
+                continue
 
         cleaned_item = re.sub(r'^[-*•\d\.\>\s]+', '', stripped).strip()
 
         if current_section == "skills":
             if cleaned_item:
-                items = [x.strip() for x in re.split(r'[,|;]', cleaned_item) if x.strip()]
+                # If bullet is formatted as "Category: Item1, Item2"
+                items_part = cleaned_item.split(":", 1)[1].strip() if ":" in cleaned_item else cleaned_item
+                items = [x.strip() for x in re.split(r'[,|;]', items_part) if x.strip()]
                 for item in items:
-                    if len(item) > 1:
+                    if len(item) > 1 and item not in hard_skills:
                         hard_skills.append(item)
         elif current_section == "domain":
             if cleaned_item:
-                items = [x.strip() for x in re.split(r'[,|;]', cleaned_item) if x.strip()]
+                items_part = cleaned_item.split(":", 1)[1].strip() if ":" in cleaned_item else cleaned_item
+                items = [x.strip() for x in re.split(r'[,|;]', items_part) if x.strip()]
                 for item in items:
-                    if len(item) > 1:
+                    if len(item) > 1 and item not in domains:
                         domains.append(item)
         elif current_section == "location":
             if cleaned_item and location == "Global / Remote":
                 location = cleaned_item
         elif current_section == "advantage":
-            if cleaned_item:
+            if cleaned_item and cleaned_item not in unfair_advantages:
                 unfair_advantages.append(cleaned_item)
         elif current_section == "capital":
             if cleaned_item:
